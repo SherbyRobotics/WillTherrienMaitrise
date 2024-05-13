@@ -8,7 +8,7 @@ Created on Wed Apr  1 10:15:47 2020
 import pandas as pd # data processing
 from sklearn.model_selection import train_test_split
 from xgboost import XGBRegressor
-from joblib import dump, load
+# from joblib import dump, load
 import numpy as np
 import matplotlib.pyplot as plt
 from textwrap import wrap
