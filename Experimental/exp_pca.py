@@ -3,41 +3,34 @@ import pandas as pd # data processing
 from sklearn.model_selection import train_test_split
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error as MAE
+from sklearn.decomposition import PCA
+# from rich.console import Console
+# from rich.table import Table
 import numpy as np
 
 
-# training_source = 'merged.xlsx'
-# training_source = 'Xmaxx.xlsx'
-# training_source = 'racecar.xlsx'
-training_source = 'limo.xlsx'
+training_source = 'racecar_data.xlsx'
+# training_source = 'limo_data.xlsx'
 
 data = pd.read_excel( training_source, index_col=False, engine='openpyxl')
 
-#All columb = v_i	l	a	delta	pi1	pi2	pi3	pi4	pi5	X	Y	theta	pi6
-
-inputs_columns = ["v_i","l","a","delta"]
+inputs_columns = ["v_i","l","a","delta","mu","Nf","Nr","g"]
 outputs_columns = ["Y"]
 
 L = data[["l"]].values
 X = data[inputs_columns].values
 Y = data[outputs_columns].values
 
-# Pi
-X_pi = np.zeros((X.shape[0],3))
-Y_pi = np.zeros((X.shape[0],1))
+pca = PCA(n_components=4)
 
-X_pi[:,0] = X[:,2] * X[:,1] / X[:,0]**2   # a * l / v_i**2
-X_pi[:,1] = X[:,3] # delta 
-X_pi[:,2] = X[:,0]**2 / (X[:,2] * X[:,1]) * np.tan(X[:,3]) # augmented pi
-Y_pi[:,0] = Y[:,0] / X[:,1]
+X_pca = pca.fit_transform(X)
 
 model = XGBRegressor()
 
-model.fit(X_pi,Y_pi)
+model.fit(X_pca,Y)
 
-# Test on training data
-Y_hat_pi = model.predict(X_pi)
-Y_hat = Y_hat_pi * X[:,1]
+## Test on training data
+Y_hat = model.predict(X_pca)
 
 average_error = MAE(Y_hat,Y)
 print("Self Average error : ", average_error, '[m]')
@@ -48,9 +41,9 @@ average_error_normalized = MAE(Y_hat_normalized,Y_normalized)
 print("Self Average error normalized: ", average_error_normalized * 100, '%')
 
 
-# Test data
+# Test on Xmaxx data
 
-test_source = 'Xmaxx.xlsx'
+test_source = 'Xmaxx_data.xlsx'
 
 data_test = pd.read_excel( test_source, index_col=False, engine='openpyxl')
 
@@ -58,23 +51,10 @@ L_test = data_test[["l"]].values
 X_test = data_test[inputs_columns].values
 Y_test = data_test[outputs_columns].values
 
+X_pca_test = pca.transform(X_test)
 
-# Predictions
-# Pi
-X_test_pi = np.zeros((X_test.shape[0],3))
-Y_test_pi = np.zeros((X_test.shape[0],1))
+Y_hat_test = model.predict(X_pca_test)
 
-X_test_pi[:,0] = X_test[:,2] * X_test[:,1] / X_test[:,0]**2   # a * l / v_i**2
-X_test_pi[:,1] = X_test[:,3] # delta 
-X_test_pi[:,2] = X_test[:,0]**2 / (X_test[:,2] * X_test[:,1]) * np.tan(X_test[:,3]) # augmented pi
-Y_test_pi[:,0] = Y_test[:,0] / X_test[:,1]
-
-# Test on training data
-Y_hat_test_pi = model.predict(X_test_pi)
-Y_hat_test = Y_hat_test_pi * X_test[:,1]
-
-
-# Evaluation
 test_average_error = MAE(Y_hat_test,Y_test)
 print("Test Average error : ", test_average_error, '[m]')
 

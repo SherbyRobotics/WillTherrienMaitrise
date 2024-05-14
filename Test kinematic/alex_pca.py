@@ -11,8 +11,8 @@ import numpy as np
 
 # training_source =  'merged.xlsx'
 # training_source = 'Xmaxx.xlsx'
-training_source = 'racecar.xlsx'
-# training_source = 'limo.xlsx'
+# training_source = 'racecar.xlsx'
+training_source = 'limo.xlsx'
 
 data = pd.read_excel( training_source, index_col=False, engine='openpyxl')
 
@@ -25,7 +25,7 @@ L = data[["l"]].values
 X = data[inputs_columns].values
 Y = data[outputs_columns].values
 
-pca = PCA(n_components=4)
+pca = PCA(n_components=2)
 
 X_pca = pca.fit_transform(X)
 

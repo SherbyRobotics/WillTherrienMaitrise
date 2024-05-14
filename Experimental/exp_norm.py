@@ -8,17 +8,14 @@ from sklearn.metrics import mean_absolute_error as MAE
 import numpy as np
 
 
-# training_source = 'merged.xlsx'
-# training_source = 'Xmaxx.xlsx'
-# training_source = 'racecar.xlsx'
-training_source = 'limo.xlsx'
+training_source = 'racecar_data.xlsx'
+# training_source = 'limo_data.xlsx'
 
 data = pd.read_excel( training_source, index_col=False, engine='openpyxl')
 
-#All columb = v_i	l	a	delta	pi1	pi2	pi3	pi4	pi5	X	Y	theta	pi6
-
-inputs_columns = ["v_i","l","a","delta"]
+inputs_columns = ["v_i","l","a","delta","mu","Nf","Nr","g"]
 outputs_columns = ["Y"]
+
 
 L = data[["l"]].values
 X = data[inputs_columns].values
@@ -29,6 +26,10 @@ v_i_max = X[:,0].max()
 l_max = X[:,1].max()
 a_max = X[:,2].max()
 delta_max = X[:,3].max()
+mu_max = X[:,4].max()
+nf_max = X[:,5].max()
+nr_max = X[:,6].max()
+g_max = X[:,7].max()
 Y_max = Y.max()
 
 X_normalized = X.copy()
@@ -36,6 +37,10 @@ X_normalized[:,0] = X[:,0] / v_i_max
 X_normalized[:,1] = X[:,1] / l_max
 X_normalized[:,2] = X[:,2] / a_max
 X_normalized[:,3] = X[:,3] / delta_max
+X_normalized[:,4] = X[:,4] / mu_max
+X_normalized[:,5] = X[:,5] / nf_max
+X_normalized[:,6] = X[:,6] / nr_max
+X_normalized[:,7] = X[:,7] / g_max
 
 Y_normalized = Y[:,0] / Y_max
 
@@ -58,7 +63,7 @@ print("Self Average error normalized: ", average_error_normalized * 100, '%')
 
 # Test data
 
-test_source = 'Xmaxx.xlsx'
+test_source = 'Xmaxx_data.xlsx'
 
 data_test = pd.read_excel( test_source, index_col=False, engine='openpyxl')
 
@@ -73,6 +78,11 @@ X_test_normalized[:,0] = X_test[:,0] / v_i_max
 X_test_normalized[:,1] = X_test[:,1] / l_max
 X_test_normalized[:,2] = X_test[:,2] / a_max
 X_test_normalized[:,3] = X_test[:,3] / delta_max
+X_test_normalized[:,4] = X_test[:,4] / mu_max
+X_test_normalized[:,5] = X_test[:,5] / nf_max
+X_test_normalized[:,6] = X_test[:,6] / nr_max
+X_test_normalized[:,7] = X_test[:,7] / g_max
+
 
 Y_hat_test_normalized = model.predict(X_test_normalized)
 
